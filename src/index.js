@@ -32,16 +32,9 @@ const C = {
 };
 
 // Premium custom emoji slots — fallback to regular emoji if no ID set
+// (Currently only money has a premium ID; the rest stay plain emojis.)
 const EMOJI = {
-  wolf:    { fallback: '🐺', id: process.env.EMOJI_WOLF_ID    },
-  whale:   { fallback: '🐋', id: process.env.EMOJI_WHALE_ID   },
   money:   { fallback: '🤑', id: process.env.EMOJI_MONEY_ID   },
-  rocket:  { fallback: '🚀', id: process.env.EMOJI_ROCKET_ID  },
-  weed:    { fallback: '🐾', id: process.env.EMOJI_WEED_ID    },
-  fire:    { fallback: '🔥', id: process.env.EMOJI_FIRE_ID    },
-  moon:    { fallback: '🌕', id: process.env.EMOJI_MOON_ID    },
-  diamond: { fallback: '💎', id: process.env.EMOJI_DIAMOND_ID },
-  alert:   { fallback: '🚨', id: process.env.EMOJI_ALERT_ID   },
 };
 
 // Wrap an emoji in <tg-emoji> only when a custom ID is configured.
@@ -163,13 +156,28 @@ async function postBuyAlert({ buyer, monSpent, tokensGot, txHash }) {
   const change   = +d.priceChange?.h24 || 0;
   const isWhale  = usdSpent >= C.WHALE_USD;
 
-  // visual buy meter (weed leaves scaled to spend size)
-  const bites = Math.min(20, Math.max(1, Math.floor(usdSpent / 25)));
-  const meter = e('weed').repeat(bites);
+  // 🤑 meter scaled by buy size. Premium users see the animated version.
+  // small buy ($1-25)   → 3-15 emojis
+  // medium ($25-100)    → 15-40 emojis
+  // big ($100-500)      → 40-80 emojis
+  // whale ($500+)       → 80-200 emojis (wall of money)
+  let count;
+  if (usdSpent < 25)        count = Math.max(3,  Math.floor(usdSpent * 0.6));
+  else if (usdSpent < 100)  count = Math.floor(15 + (usdSpent - 25) * 0.33);
+  else if (usdSpent < 500)  count = Math.floor(40 + (usdSpent - 100) * 0.1);
+  else                      count = Math.min(200, Math.floor(80 + (usdSpent - 500) * 0.12));
+
+  // Break meter into rows of 20 so it wraps nicely in Telegram
+  const moneyEmoji = e('money');
+  const rows = [];
+  for (let i = 0; i < count; i += 20) {
+    rows.push(moneyEmoji.repeat(Math.min(20, count - i)));
+  }
+  const meter = rows.join('\n');
 
   const header = isWhale
-    ? `${e('alert')} <b>PACK ALPHA BITE</b> ${e('whale')}${e('alert')}`
-    : `${e('wolf')} <b>PACK ATE</b> ${e('weed')}`;
+    ? `🚨 <b>PACK ALPHA BITE</b> 🐋🚨`
+    : `🐺 <b>PACK ATE</b>`;
 
   const lines = [
     header,
@@ -178,8 +186,8 @@ async function postBuyAlert({ buyer, monSpent, tokensGot, txHash }) {
     '',
     `${e('money')} <b>Spent:</b> ${monSpent.toFixed(3)} MON · ${esc(fmtUsd(usdSpent))}`,
     `📦 <b>Got:</b> ${esc(fmtNum(tokensGot))} $MONWOLF`,
-    `${e('diamond')} <b>Price:</b> ${esc(fmtUsd(priceUsd))} (${change >= 0 ? '+' : ''}${change.toFixed(1)}% 24h)`,
-    `${e('moon')} <b>MC:</b> ${esc(fmtUsd(mc))}`,
+    `💎 <b>Price:</b> ${esc(fmtUsd(priceUsd))} (${change >= 0 ? '+' : ''}${change.toFixed(1)}% 24h)`,
+    `🌕 <b>MC:</b> ${esc(fmtUsd(mc))}`,
     `💧 <b>LP:</b> ${esc(fmtUsd(lpUsd))}`,
     '',
     `${tier.emoji} <b>Buyer:</b> <code>${shortAddr(buyer)}</code> · tier <b>${tier.name}</b> (${prev + 1} bite${prev ? 's' : ''})`,
@@ -195,7 +203,7 @@ async function postBuyAlert({ buyer, monSpent, tokensGot, txHash }) {
   // LP drop alert
   if (LAST_LP_USD && lpUsd < LAST_LP_USD * (1 - C.LP_DROP_PCT / 100)) {
     await tg.sendMessage(C.TG_CHAT_ID,
-      `⚠️ <b>LP DROP WARNING</b> ⚠️\nLP fell from ${esc(fmtUsd(LAST_LP_USD))} → ${esc(fmtUsd(lpUsd))} (${(((lpUsd - LAST_LP_USD)/LAST_LP_USD)*100).toFixed(1)}%)\nKeep eyes on the pack ${e('wolf')}`,
+      `⚠️ <b>LP DROP WARNING</b> ⚠️\nLP fell from ${esc(fmtUsd(LAST_LP_USD))} → ${esc(fmtUsd(lpUsd))} (${(((lpUsd - LAST_LP_USD)/LAST_LP_USD)*100).toFixed(1)}%)\nKeep eyes on the pack 🐺`,
       { parse_mode: 'HTML' });
   }
   LAST_LP_USD = lpUsd;
@@ -423,9 +431,9 @@ async function checkMilestones() {
   while (nextMilestoneIdx < MILESTONES.length && +d.fdv >= MILESTONES[nextMilestoneIdx]) {
     const m = MILESTONES[nextMilestoneIdx];
     await tg.sendMessage(C.TG_CHAT_ID, [
-      `${e('moon').repeat(3)} <b>MILESTONE</b> ${e('moon').repeat(3)}`,
+      `🌕🌕🌕 <b>MILESTONE</b> 🌕🌕🌕`,
       `$MONWOLF just crossed <b>${esc(fmtUsd(m))}</b> MC`,
-      `the pack runs together ${e('wolf')}`,
+      `the pack runs together 🐺`,
     ].join('\n'), { parse_mode: 'HTML' });
     nextMilestoneIdx++;
   }
