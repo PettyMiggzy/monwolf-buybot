@@ -31,6 +31,37 @@ const C = {
   LP_DROP_PCT:    +process.env.LP_DROP_ALERT_PCT || 15,
 };
 
+// Premium custom emoji slots — fallback to regular emoji if no ID set
+const EMOJI = {
+  wolf:    { fallback: '🐺', id: process.env.EMOJI_WOLF_ID    },
+  whale:   { fallback: '🐋', id: process.env.EMOJI_WHALE_ID   },
+  money:   { fallback: '💰', id: process.env.EMOJI_MONEY_ID   },
+  rocket:  { fallback: '🚀', id: process.env.EMOJI_ROCKET_ID  },
+  weed:    { fallback: '🌿', id: process.env.EMOJI_WEED_ID    },
+  fire:    { fallback: '🔥', id: process.env.EMOJI_FIRE_ID    },
+  moon:    { fallback: '🌕', id: process.env.EMOJI_MOON_ID    },
+  diamond: { fallback: '💎', id: process.env.EMOJI_DIAMOND_ID },
+  alert:   { fallback: '🚨', id: process.env.EMOJI_ALERT_ID   },
+};
+
+// Wrap an emoji in <tg-emoji> only when a custom ID is configured.
+// Premium users see the animated version, others see the fallback.
+function e(key) {
+  const slot = EMOJI[key];
+  if (!slot) return '';
+  return slot.id
+    ? `<tg-emoji emoji-id="${slot.id}">${slot.fallback}</tg-emoji>`
+    : slot.fallback;
+}
+
+// HTML-escape user-supplied/dynamic strings going into HTML messages
+function esc(s) {
+  return String(s)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+}
+
 ['TG_BOT_TOKEN','TG_CHAT_ID','OPENAI_API_KEY','RPC_URL','TOKEN','LP'].forEach(k => {
   if (!C[k]) { console.error(`❌ Missing env: ${k}`); process.exit(1); }
 });
@@ -132,36 +163,40 @@ async function postBuyAlert({ buyer, monSpent, tokensGot, txHash }) {
   const change   = +d.priceChange?.h24 || 0;
   const isWhale  = usdSpent >= C.WHALE_USD;
 
-  // visual buy meter (emoji wolf bites scaled to spend size)
+  // visual buy meter (weed leaves scaled to spend size)
   const bites = Math.min(20, Math.max(1, Math.floor(usdSpent / 25)));
-  const meter = '🌿'.repeat(bites);
+  const meter = e('weed').repeat(bites);
+
+  const header = isWhale
+    ? `${e('alert')} <b>PACK ALPHA BITE</b> ${e('whale')}${e('alert')}`
+    : `${e('wolf')} <b>PACK ATE</b> ${e('weed')}`;
 
   const lines = [
-    isWhale ? '🚨 *PACK ALPHA BITE* 🚨' : '🐺 *PACK ATE* 🌿',
+    header,
     '━━━━━━━━━━━━━━━━━━━',
     meter,
     '',
-    `💰 *Spent:* ${monSpent.toFixed(3)} MON · ${fmtUsd(usdSpent)}`,
-    `📦 *Got:* ${fmtNum(tokensGot)} $MONWOLF`,
-    `💎 *Price:* ${fmtUsd(priceUsd)} (${change >= 0 ? '+' : ''}${change.toFixed(1)}% 24h)`,
-    `🌕 *MC:* ${fmtUsd(mc)}`,
-    `💧 *LP:* ${fmtUsd(lpUsd)}`,
+    `${e('money')} <b>Spent:</b> ${monSpent.toFixed(3)} MON · ${esc(fmtUsd(usdSpent))}`,
+    `📦 <b>Got:</b> ${esc(fmtNum(tokensGot))} $MONWOLF`,
+    `${e('diamond')} <b>Price:</b> ${esc(fmtUsd(priceUsd))} (${change >= 0 ? '+' : ''}${change.toFixed(1)}% 24h)`,
+    `${e('moon')} <b>MC:</b> ${esc(fmtUsd(mc))}`,
+    `💧 <b>LP:</b> ${esc(fmtUsd(lpUsd))}`,
     '',
-    `${tier.emoji} *Buyer:* \`${shortAddr(buyer)}\` · tier *${tier.name}* (${prev + 1} bite${prev ? 's' : ''})`,
+    `${tier.emoji} <b>Buyer:</b> <code>${shortAddr(buyer)}</code> · tier <b>${tier.name}</b> (${prev + 1} bite${prev ? 's' : ''})`,
     '',
-    `[chart](https://dexscreener.com/monad/${C.LP}) · [buy](https://crustfinance.xyz/swap?inputCurrency=MON&outputCurrency=${C.TOKEN}) · [tx](https://monadscan.com/tx/${txHash}) · [site](https://monwolf.fun)`,
+    `<a href="https://dexscreener.com/monad/${C.LP}">chart</a> · <a href="https://crustfinance.xyz/swap?inputCurrency=MON&amp;outputCurrency=${C.TOKEN}">buy</a> · <a href="https://monadscan.com/tx/${txHash}">tx</a> · <a href="https://monwolf.fun">site</a>`,
   ];
 
   await tg.sendMessage(C.TG_CHAT_ID, lines.join('\n'), {
-    parse_mode: 'Markdown',
+    parse_mode: 'HTML',
     disable_web_page_preview: true,
   });
 
   // LP drop alert
   if (LAST_LP_USD && lpUsd < LAST_LP_USD * (1 - C.LP_DROP_PCT / 100)) {
     await tg.sendMessage(C.TG_CHAT_ID,
-      `⚠️ *LP DROP WARNING* ⚠️\nLP fell from ${fmtUsd(LAST_LP_USD)} → ${fmtUsd(lpUsd)} (${(((lpUsd - LAST_LP_USD)/LAST_LP_USD)*100).toFixed(1)}%)\nKeep eyes on the pack 🐺`,
-      { parse_mode: 'Markdown' });
+      `⚠️ <b>LP DROP WARNING</b> ⚠️\nLP fell from ${esc(fmtUsd(LAST_LP_USD))} → ${esc(fmtUsd(lpUsd))} (${(((lpUsd - LAST_LP_USD)/LAST_LP_USD)*100).toFixed(1)}%)\nKeep eyes on the pack ${e('wolf')}`,
+      { parse_mode: 'HTML' });
   }
   LAST_LP_USD = lpUsd;
 }
@@ -388,10 +423,10 @@ async function checkMilestones() {
   while (nextMilestoneIdx < MILESTONES.length && +d.fdv >= MILESTONES[nextMilestoneIdx]) {
     const m = MILESTONES[nextMilestoneIdx];
     await tg.sendMessage(C.TG_CHAT_ID, [
-      `🌕🌕🌕 *MILESTONE* 🌕🌕🌕`,
-      `$MONWOLF just crossed *${fmtUsd(m)}* MC`,
-      `the pack runs together 🐺`,
-    ].join('\n'), { parse_mode: 'Markdown' });
+      `${e('moon').repeat(3)} <b>MILESTONE</b> ${e('moon').repeat(3)}`,
+      `$MONWOLF just crossed <b>${esc(fmtUsd(m))}</b> MC`,
+      `the pack runs together ${e('wolf')}`,
+    ].join('\n'), { parse_mode: 'HTML' });
     nextMilestoneIdx++;
   }
 }

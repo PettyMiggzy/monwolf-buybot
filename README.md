@@ -12,6 +12,34 @@ Watches the $MONWOLF / WMON LP on Monad mainnet for buys, posts pack-themed aler
 - 🤖 **AI pack chatter** — responds when @-mentioned or when someone says "monwolf"/"wolf"/"pack"
 - 📊 **Commands**: `/mc /price /chart /buy /ca /lp /holders /stats /pack /site`
 
+## Premium custom emojis (optional)
+
+The bot supports Telegram Premium animated/custom emojis. Premium users in your chat see the animated version; non-Premium users see the regular fallback. **Your bot doesn't need Premium — just the IDs.**
+
+**How to get a custom emoji ID:**
+
+1. Send the premium emoji you want in any chat
+2. Forward that message to **@ShowJsonBot** (or **@RawDataBot**)
+3. The bot replies with the message JSON
+4. Find the `entities` array, look for the entity with `type: "custom_emoji"` — copy its `custom_emoji_id`
+5. Paste into `.env` (e.g. `EMOJI_WOLF_ID=5368324170671202286`)
+
+**Slots available:**
+
+| Env var | Used in | Fallback |
+|---|---|---|
+| `EMOJI_WOLF_ID`    | Buy alerts header, pack mentions | 🐺 |
+| `EMOJI_WHALE_ID`   | Whale alert | 🐋 |
+| `EMOJI_MONEY_ID`   | "Spent" line | 💰 |
+| `EMOJI_ROCKET_ID`  | (reserved) | 🚀 |
+| `EMOJI_WEED_ID`    | Bite meter, header decoration | 🌿 |
+| `EMOJI_FIRE_ID`    | (reserved) | 🔥 |
+| `EMOJI_MOON_ID`    | MC line, milestones | 🌕 |
+| `EMOJI_DIAMOND_ID` | Price line | 💎 |
+| `EMOJI_ALERT_ID`   | Whale siren | 🚨 |
+
+Leave any blank to keep the regular emoji. Bot uses HTML parse mode so this all works invisibly.
+
 ## Deploy on your server (206.189.216.202)
 
 ```bash
