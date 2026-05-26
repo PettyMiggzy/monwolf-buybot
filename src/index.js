@@ -35,7 +35,7 @@ const C = {
 const EMOJI = {
   wolf:    { fallback: '🐺', id: process.env.EMOJI_WOLF_ID    },
   whale:   { fallback: '🐋', id: process.env.EMOJI_WHALE_ID   },
-  money:   { fallback: '💰', id: process.env.EMOJI_MONEY_ID   },
+  money:   { fallback: '🤑', id: process.env.EMOJI_MONEY_ID   },
   rocket:  { fallback: '🚀', id: process.env.EMOJI_ROCKET_ID  },
   weed:    { fallback: '🌿', id: process.env.EMOJI_WEED_ID    },
   fire:    { fallback: '🔥', id: process.env.EMOJI_FIRE_ID    },
