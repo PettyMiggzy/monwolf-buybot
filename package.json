@@ -1,0 +1,20 @@
+{
+  "name": "monwolf-buybot",
+  "version": "1.0.0",
+  "description": "Monwolf buy bot + AI pack interaction for Telegram. Monad mainnet.",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "node --watch src/index.js"
+  },
+  "dependencies": {
+    "node-telegram-bot-api": "^0.66.0",
+    "ethers": "^6.13.4",
+    "openai": "^4.73.1",
+    "dotenv": "^16.4.5",
+    "node-fetch": "^3.3.2"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
