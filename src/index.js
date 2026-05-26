@@ -288,7 +288,7 @@ async function statsBlock() {
   ].filter(Boolean).join('\n');
 }
 
-tg.onText(/^\/(start|help|commands)$/i, (msg) => {
+tg.onText(/^\/(start|help|commands)(@\w+)?$/i, (msg) => {
   tg.sendMessage(msg.chat.id, [
     '🐺 *MONWOLF PACK BOT* 🌿',
     '',
@@ -308,50 +308,50 @@ tg.onText(/^\/(start|help|commands)$/i, (msg) => {
   ].join('\n'), { parse_mode: 'Markdown' });
 });
 
-tg.onText(/^\/mc$/i, async (msg) => {
+tg.onText(/^\/(mc)(@\w+)?$/i, async (msg) => {
   const d = await dex();
   if (!d) return tg.sendMessage(msg.chat.id, '⚠️ no data');
   tg.sendMessage(msg.chat.id, `🌕 *MC:* ${fmtUsd(+d.fdv)} · pack growing`, { parse_mode: 'Markdown' });
 });
 
-tg.onText(/^\/price$/i, async (msg) => {
+tg.onText(/^\/(price)(@\w+)?$/i, async (msg) => {
   const d = await dex();
   if (!d) return tg.sendMessage(msg.chat.id, '⚠️ no data');
   tg.sendMessage(msg.chat.id, `💎 *${fmtUsd(+d.priceUsd)}* (${(+d.priceChange?.h24 || 0).toFixed(1)}% 24h)`, { parse_mode: 'Markdown' });
 });
 
-tg.onText(/^\/chart$/i, (msg) => {
+tg.onText(/^\/(chart)(@\w+)?$/i, (msg) => {
   tg.sendMessage(msg.chat.id, `📊 chart: https://dexscreener.com/monad/${C.LP}`);
 });
 
-tg.onText(/^\/buy$/i, (msg) => {
+tg.onText(/^\/(buy)(@\w+)?$/i, (msg) => {
   tg.sendMessage(msg.chat.id, `💊 buy: https://nad.fun/token/${C.TOKEN}`);
 });
 
-tg.onText(/^\/ca$/i, (msg) => {
+tg.onText(/^\/(ca)(@\w+)?$/i, (msg) => {
   tg.sendMessage(msg.chat.id, `🔗 CA:\n\`${C.TOKEN}\``, { parse_mode: 'Markdown' });
 });
 
-tg.onText(/^\/lp$/i, async (msg) => {
+tg.onText(/^\/(lp)(@\w+)?$/i, async (msg) => {
   const d = await dex();
   if (!d) return tg.sendMessage(msg.chat.id, '⚠️ no data');
   tg.sendMessage(msg.chat.id, `💧 LP: *${fmtUsd(+d.liquidity?.usd || 0)}*`, { parse_mode: 'Markdown' });
 });
 
-tg.onText(/^\/holders$/i, async (msg) => {
+tg.onText(/^\/(holders)(@\w+)?$/i, async (msg) => {
   const hc = await holderCount();
   tg.sendMessage(msg.chat.id, hc ? `🐾 *${fmtNum(hc)}* holders` : '⚠️ couldn\'t fetch right now', { parse_mode: 'Markdown' });
 });
 
-tg.onText(/^\/stats$/i, async (msg) => {
+tg.onText(/^\/(stats)(@\w+)?$/i, async (msg) => {
   tg.sendMessage(msg.chat.id, await statsBlock(), { parse_mode: 'Markdown', disable_web_page_preview: true });
 });
 
-tg.onText(/^\/site$/i, (msg) => {
+tg.onText(/^\/(site)(@\w+)?$/i, (msg) => {
   tg.sendMessage(msg.chat.id, `🌐 https://monwolf.fun`);
 });
 
-tg.onText(/^\/pack$/i, (msg) => {
+tg.onText(/^\/(pack)(@\w+)?$/i, (msg) => {
   tg.sendMessage(msg.chat.id, [
     '🐺 *THE PACK* 🐺',
     '',
