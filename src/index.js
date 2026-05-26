@@ -10,6 +10,13 @@ import TelegramBot from 'node-telegram-bot-api';
 import { ethers } from 'ethers';
 import OpenAI from 'openai';
 import fetch from 'node-fetch';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import fs from 'fs';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const BUY_GIF_PATH = path.resolve(__dirname, '..', 'assets', 'buy-alert.mp4');
+const HAS_BUY_GIF = fs.existsSync(BUY_GIF_PATH);
 
 // ----------------------------------------------------------------
 // CONFIG
@@ -195,10 +202,26 @@ async function postBuyAlert({ buyer, monSpent, tokensGot, txHash }) {
     `<a href="https://dexscreener.com/monad/${C.LP}">chart</a> · <a href="https://nad.fun/token/${C.TOKEN}">buy</a> · <a href="https://monadscan.com/tx/${txHash}">tx</a> · <a href="https://monwolf.fun">site</a>`,
   ];
 
-  await tg.sendMessage(C.TG_CHAT_ID, lines.join('\n'), {
-    parse_mode: 'HTML',
-    disable_web_page_preview: true,
-  });
+  const caption = lines.join('\n');
+  if (HAS_BUY_GIF) {
+    try {
+      await tg.sendAnimation(C.TG_CHAT_ID, BUY_GIF_PATH, {
+        caption,
+        parse_mode: 'HTML',
+      });
+    } catch (e) {
+      console.warn('sendAnimation failed, falling back to text:', e.message);
+      await tg.sendMessage(C.TG_CHAT_ID, caption, {
+        parse_mode: 'HTML',
+        disable_web_page_preview: true,
+      });
+    }
+  } else {
+    await tg.sendMessage(C.TG_CHAT_ID, caption, {
+      parse_mode: 'HTML',
+      disable_web_page_preview: true,
+    });
+  }
 
   // LP drop alert
   if (LAST_LP_USD && lpUsd < LAST_LP_USD * (1 - C.LP_DROP_PCT / 100)) {
@@ -454,6 +477,7 @@ async function checkMilestones() {
 // ----------------------------------------------------------------
 (async () => {
   console.log('🐺 monwolf-buybot starting…');
+  console.log(HAS_BUY_GIF ? `🎬 buy-alert.mp4 loaded (${(fs.statSync(BUY_GIF_PATH).size/1024).toFixed(0)} KB)` : '⚠️  assets/buy-alert.mp4 missing — alerts will be text only');
   await initListener();
   // Periodic checks (milestones every 60s)
   setInterval(checkMilestones, 60_000);
