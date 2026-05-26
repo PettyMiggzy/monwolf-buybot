@@ -184,7 +184,7 @@ async function postBuyAlert({ buyer, monSpent, tokensGot, txHash }) {
     '',
     `${tier.emoji} <b>Buyer:</b> <code>${shortAddr(buyer)}</code> · tier <b>${tier.name}</b> (${prev + 1} bite${prev ? 's' : ''})`,
     '',
-    `<a href="https://dexscreener.com/monad/${C.LP}">chart</a> · <a href="https://crustfinance.xyz/swap?inputCurrency=MON&amp;outputCurrency=${C.TOKEN}">buy</a> · <a href="https://monadscan.com/tx/${txHash}">tx</a> · <a href="https://monwolf.fun">site</a>`,
+    `<a href="https://dexscreener.com/monad/${C.LP}">chart</a> · <a href="https://nad.fun/token/${C.TOKEN}">buy</a> · <a href="https://monadscan.com/tx/${txHash}">tx</a> · <a href="https://monwolf.fun">site</a>`,
   ];
 
   await tg.sendMessage(C.TG_CHAT_ID, lines.join('\n'), {
@@ -253,7 +253,7 @@ async function statsBlock() {
     hc ? `🐾 *Holders:* ${fmtNum(hc)}` : '',
     '',
     `🔗 CA: \`${C.TOKEN}\``,
-    `[chart](https://dexscreener.com/monad/${C.LP}) · [buy](https://crustfinance.xyz/swap?inputCurrency=MON&outputCurrency=${C.TOKEN}) · [site](https://monwolf.fun)`,
+    `[chart](https://dexscreener.com/monad/${C.LP}) · [buy](https://nad.fun/token/${C.TOKEN}) · [site](https://monwolf.fun)`,
   ].filter(Boolean).join('\n');
 }
 
@@ -294,7 +294,7 @@ tg.onText(/^\/chart$/i, (msg) => {
 });
 
 tg.onText(/^\/buy$/i, (msg) => {
-  tg.sendMessage(msg.chat.id, `💊 buy: https://crustfinance.xyz/swap?inputCurrency=MON&outputCurrency=${C.TOKEN}`);
+  tg.sendMessage(msg.chat.id, `💊 buy: https://nad.fun/token/${C.TOKEN}`);
 });
 
 tg.onText(/^\/ca$/i, (msg) => {
