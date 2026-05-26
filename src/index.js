@@ -37,7 +37,7 @@ const EMOJI = {
   whale:   { fallback: '🐋', id: process.env.EMOJI_WHALE_ID   },
   money:   { fallback: '🤑', id: process.env.EMOJI_MONEY_ID   },
   rocket:  { fallback: '🚀', id: process.env.EMOJI_ROCKET_ID  },
-  weed:    { fallback: '🌿', id: process.env.EMOJI_WEED_ID    },
+  weed:    { fallback: '🐾', id: process.env.EMOJI_WEED_ID    },
   fire:    { fallback: '🔥', id: process.env.EMOJI_FIRE_ID    },
   moon:    { fallback: '🌕', id: process.env.EMOJI_MOON_ID    },
   diamond: { fallback: '💎', id: process.env.EMOJI_DIAMOND_ID },

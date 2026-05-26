@@ -32,7 +32,7 @@ The bot supports Telegram Premium animated/custom emojis. Premium users in your 
 | `EMOJI_WHALE_ID`   | Whale alert | 🐋 |
 | `EMOJI_MONEY_ID`   | "Spent" line | 💰 |
 | `EMOJI_ROCKET_ID`  | (reserved) | 🚀 |
-| `EMOJI_WEED_ID`    | Bite meter, header decoration | 🌿 |
+| `EMOJI_WEED_ID`    | Bite meter, header decoration | 🐾 |
 | `EMOJI_FIRE_ID`    | (reserved) | 🔥 |
 | `EMOJI_MOON_ID`    | MC line, milestones | 🌕 |
 | `EMOJI_DIAMOND_ID` | Price line | 💎 |
